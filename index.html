@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>국민연금 조기노령연금 손익분기점 계산기</title>
+<style>
+  :root {
+    --primary: #0d9488;
+    --primary-dark: #0f766e;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --accent: #e11d48;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    padding: 24px 16px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .calc-container {
+    background: var(--card);
+    width: 100%;
+    max-width: 580px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    border: 1px solid var(--border);
+    padding: 28px;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #134e4a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .sub-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #334155;
+  }
+
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  input[type="number"], select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    outline: none;
+    transition: border-color 0.2s;
+    background: #ffffff;
+  }
+
+  input[type="number"]:focus, select:focus {
+    border-color: var(--primary);
+  }
+
+  .unit {
+    position: absolute;
+    right: 16px;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .btn-calc {
+    width: 100%;
+    background: var(--primary);
+    color: white;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 8px;
+  }
+
+  .btn-calc:hover {
+    background: var(--primary-dark);
+  }
+
+  /* 결과 영역 */
+  .result-box {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px dashed var(--border);
+    display: none;
+  }
+
+  .result-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 16px;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    background: #f0fdfa;
+    border: 1px solid #ccfbf1;
+    border-radius: 10px;
+    padding: 14px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: #0f766e;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: #115e59;
+  }
+
+  .highlight-card {
+    background: #fff1f2;
+    border: 1.5px solid #fecdd3;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .highlight-label {
+    font-size: 14px;
+    color: #be123c;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .highlight-age {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--accent);
+  }
+
+  .conclusion-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #475569;
+    background: #f8fafc;
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .info-note {
+    margin-top: 16px;
+    font-size: 11px;
+    color: #94a3b8;
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+<div class="calc-container">
+  <h1>💰 조기노령연금 손익분기점 계산기</h1>
+  <p class="sub-desc">정상 수령 나이와 조기 수령 간의 월 수령액 차이 및 누적 총액 역전 나이를 계산합니다.</p>
+
+  <div class="form-group">
+    <label for="normalAge">법정 정상 수령 나이</label>
+    <select id="normalAge">
+      <option value="65" selected>만 65세 (1969년 이후 출생자)</option>
+      <option value="64">만 64세 (1965~1968년생)</option>
+      <option value="63">만 63세 (1961~1964년생)</option>
+      <option value="62">만 62세 (1957~1960년생)</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="earlyYears">앞당겨 받을 기간 (조기 수령 기간)</label>
+    <select id="earlyYears">
+      <option value="1">1년 조기 수령 (6% 감액 / 94% 수령)</option>
+      <option value="2">2년 조기 수령 (12% 감액 / 88% 수령)</option>
+      <option value="3">3년 조기 수령 (18% 감액 / 82% 수령)</option>
+      <option value="4">4년 조기 수령 (24% 감액 / 76% 수령)</option>
+      <option value="5" selected>5년 조기 수령 (30% 최대 감액 / 70% 수령)</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="expectedPension">정상 수령 시 예상 연금액 (월 기준)</label>
+    <div class="input-wrapper">
+      <input type="number" id="expectedPension" value="1000000" step="10000" min="100000" placeholder="예: 1000000">
+      <span class="unit">원</span>
+    </div>
+  </div>
+
+  <button class="btn-calc" onclick="calculateBreakEven()">손익분기점 계산하기</button>
+
+  <!-- 계산 결과 표시부 -->
+  <div class="result-box" id="resultBox">
+    <div class="result-title">📊 계산 분석 결과</div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">조기 수령 시 월 지급액</div>
+        <div class="stat-value" id="valMonthlyEarly">0원</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">매월 깎이는 금액 (평생)</div>
+        <div class="stat-value" id="valMonthlyLoss" style="color: #be123c;">0원</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">조기 수령 개시 나이</div>
+        <div class="stat-value" id="valStartAge">만 0세</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">정상 수령 전 먼저 받는 총액</div>
+        <div class="stat-value" id="valPreTotal">0원</div>
+      </div>
+    </div>
+
+    <div class="highlight-card">
+      <div class="highlight-label">누적 총수령액이 역전되는 손익분기점 나이</div>
+      <div class="highlight-age" id="valBreakEvenAge">만 0세 0개월</div>
+    </div>
+
+    <div class="conclusion-text" id="valConclusion">
+      분석 내용이 여기에 표시됩니다.
+    </div>
+
+    <div class="info-note">
+      * 본 계산기는 연도별 물가상승률, 세금, 수령액 재투자 수익률을 제외한 단순 누적 수령액 기준 공식 모델입니다. 실제 수급 금액은 가입 기간 및 국민연금공단 심사에 따라 달라질 수 있습니다.
+    </div>
+  </div>
+</div>
+
+<script>
+function calculateBreakEven() {
+  const normalAge = parseInt(document.getElementById('normalAge').value);
+  const earlyYears = parseInt(document.getElementById('earlyYears').value);
+  const normalAmount = parseFloat(document.getElementById('expectedPension').value);
+
+  if (isNaN(normalAmount) || normalAmount <= 0) {
+    alert('올바른 예상 연금액을 입력해 주세요.');
+    return;
+  }
+
+  // 1. 감액률 계산: 1년당 6% (개월당 0.5%)
+  const discountRate = earlyYears * 0.06;
+  const earlyAmount = normalAmount * (1 - discountRate);
+  const monthlyLoss = normalAmount - earlyAmount;
+
+  // 2. 조기 수령 기간 개월 수 및 먼저 받는 총액
+  const earlyMonths = earlyYears * 12;
+  const preReceivedTotal = earlyAmount * earlyMonths;
+
+  // 3. 정상 수령 시작 나이
+  const earlyStartAge = normalAge - earlyYears;
+
+  // 4. 역전 소요 개월 수 계산: 먼저 받은 총액 / 매월 발생하는 차액
+  // preReceivedTotal / monthlyLoss = (earlyAmount * earlyMonths) / (normalAmount - earlyAmount)
+  const catchUpMonths = Math.round(preReceivedTotal / monthlyLoss);
+
+  // 손익분기점 환산 (정상 수령 나이 + 따라잡는 데 걸리는 기간)
+  const breakEvenTotalMonths = (normalAge * 12) + catchUpMonths;
+  const breakEvenYears = Math.floor(breakEvenTotalMonths / 12);
+  const breakEvenMonthsRem = breakEvenTotalMonths % 12;
+
+  // DOM 렌더링
+  document.getElementById('valMonthlyEarly').innerText = Math.round(earlyAmount).toLocaleString() + '원';
+  document.getElementById('valMonthlyLoss').innerText = '-' + Math.round(monthlyLoss).toLocaleString() + '원';
+  document.getElementById('valStartAge').innerText = '만 ' + earlyStartAge + '세부터';
+  document.getElementById('valPreTotal').innerText = Math.round(preReceivedTotal).toLocaleString() + '원';
+
+  const breakEvenStr = `만 ${breakEvenYears}세 ${breakEvenMonthsRem > 0 ? breakEvenMonthsRem + '개월' : ''}`;
+  document.getElementById('valBreakEvenAge').innerText = breakEvenStr;
+
+  document.getElementById('valConclusion').innerHTML = `
+    <strong>📌 판정 가이드:</strong><br>
+    • <strong>${breakEvenStr} 이전</strong>에 사망할 경우: 미리 당겨 받은 <strong>조기노령연금이 총수령액에서 유리</strong>합니다.<br>
+    • <strong>${breakEvenStr} 이후</strong>까지 생존할 경우: 매달 100% 온전히 받는 <strong>정상 노령연금의 누적 총액이 더 커집니다.</strong><br>
+    • 소득 공백기 생활비가 절실하거나 건강상 장수가 불투명하다면 조기 수령을, 평균 기대수명(83~86세) 이상 건강을 유지할 수 있다면 정상 수령을 권장합니다.
+  `;
+
+  document.getElementById('resultBox').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
